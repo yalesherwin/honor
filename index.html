@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>CHINACNU 功勋墙</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #fff3e0, #ffe0f0);
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      padding: 30px 10px;
+      font-size: 32px;
+      color: #d84315;
+    }
+    .timeline {
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+    }
+    .entry {
+      background: #ffffffcc;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin: 20px 0;
+      padding: 20px;
+      border-left: 6px solid #ff7043;
+      position: relative;
+    }
+    .entry::before {
+      content: '📌';
+      position: absolute;
+      left: -30px;
+      top: 20px;
+      font-size: 20px;
+    }
+    .entry h3 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+    .entry .date {
+      color: #888;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    .entry .reward-btn {
+      float: right;
+      background: #ff7043;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .entry .reward-btn:hover {
+      background: #e64a19;
+    }
+    .reward-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 30px 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      display: none;
+      z-index: 10;
+      text-align: center;
+    }
+    .reward-popup h2 {
+      color: #e64a19;
+      margin-bottom: 10px;
+    }
+    .reward-popup p {
+      margin: 0;
+      font-size: 18px;
+    }
+    .reward-popup .close-btn {
+      margin-top: 15px;
+      background: #ff7043;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>CHINACNU ❤️ 功勋墙</h1>
+  <div class="timeline" id="timeline"></div>
+
+  <div id="rewardPopup" class="reward-popup">
+    <h2 id="popupTitle"></h2>
+    <p id="popupContent"></p>
+    <button class="close-btn" onclick="hideReward()">关闭</button>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCZNKMCdghr3pG7oaf5KBFR_2p_aBIuv6k",
+      authDomain: "honor-94300.firebaseapp.com",
+      projectId: "honor-94300",
+      storageBucket: "honor-94300.firebasestorage.app",
+      messagingSenderId: "1086345737288",
+      appId: "1:1086345737288:web:8dc1e2afc6180b892a947d"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const timeline = document.getElementById('timeline');
+
+    function renderEntry(data) {
+      const div = document.createElement('div');
+      div.className = 'entry';
+      div.innerHTML = `
+        <h3>${data.name}</h3>
+        <div class="date">${data.date}</div>
+        <p>${data.story}</p>
+        <button class="reward-btn" onclick="showReward('${data.name}', '${data.reward}')">查看奖励</button>
+      `;
+      timeline.prepend(div);
+    }
+
+    db.collection("honors").orderBy("date", "desc").onSnapshot(snapshot => {
+      timeline.innerHTML = ''; // 清空旧内容
+      snapshot.forEach(doc => renderEntry(doc.data()));
+    });
+
+    function showReward(name, reward) {
+      document.getElementById("popupTitle").innerText = `${name} 的奖励`;
+      document.getElementById("popupContent").innerText = reward;
+      document.getElementById("rewardPopup").style.display = 'block';
+    }
+
+    function hideReward() {
+      document.getElementById("rewardPopup").style.display = 'none';
+    }
+  </script>
+</body>
+</html>
