@@ -1,1 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>CHINACNU 功勋墙 - 管理后台</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #f9f9f9;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #d84315;
+    }
+
+    .top-link {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .top-link a {
+      text-decoration: none;
+      color: white;
+      background-color: #1a73e8;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .top-link a:hover {
+      background-color: #155ab6;
+    }
+
+    form {
+      max-width: 500px;
+      margin: 20px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 16px;
+      background-color: #ff7043;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #e64a19;
+    }
+  </style>
+</head>
+<body>
+  <h1>CHINACNU 🧡 功勋墙后台录入</h1>
+
+  <div class="top-link">
+    <a href="honor-wall.html">🔙 返回功勋墙主页</a>
+  </div>
+
+  <form id="honorForm">
+    <label for="name">员工姓名</label>
+    <input type="text" id="name" required>
+
+    <label for="date">日期（如 5月6日）</label>
+    <input type="text" id="date" required>
+
+    <label for="story">事迹内容</label>
+    <textarea id="story" rows="4" required></textarea>
+
+    <label for="reward">奖励内容（如 ￥500元红包 🎉）</label>
+    <input type="text" id="reward" required>
+
+    <button type="submit">提交记录</button>
+  </form>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCZNKMCdghr3pG7oaf5KBFR_2p_aBIuv6k",
+      authDomain: "honor-94300.firebaseapp.com",
+      projectId: "honor-94300",
+      storageBucket: "honor-94300.firebasestorage.app",
+      messagingSenderId: "1086345737288",
+      appId: "1:1086345737288:web:8dc1e2afc6180b892a947d"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    document.getElementById('honorForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const date = document.getElementById('date').value;
+      const story = document.getElementById('story').value;
+      const reward = document.getElementById('reward').value;
+
+      try {
+        await db.collection('honors').add({ name, date, story, reward });
+        alert('提交成功！');
+        document.getElementById('honorForm').reset();
+      } catch (err) {
+        console.error(err);
+        alert('提交失败，请检查控制台。');
+      }
+    });
+  </script>
+</body>
+</html>
 
