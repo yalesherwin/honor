@@ -1,3 +1,4 @@
+<!-- honor/index.html -->
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -131,7 +132,7 @@
     }
 
     db.collection("honors").orderBy("date", "desc").onSnapshot(snapshot => {
-      timeline.innerHTML = ''; // 清空旧内容
+      timeline.innerHTML = '';
       snapshot.forEach(doc => renderEntry(doc.data()));
     });
 
