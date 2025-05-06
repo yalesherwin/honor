@@ -9,20 +9,18 @@
   <style>
     body {
       font-family: "Segoe UI", sans-serif;
-      background: #f9f9f9;
+      margin: 0;
       padding: 20px;
+      background: linear-gradient(135deg, #fff3e0, #ffe0f0);
     }
-
     h1 {
       text-align: center;
       color: #d84315;
     }
-
     .top-link {
       text-align: center;
       margin-bottom: 20px;
     }
-
     .top-link a {
       text-decoration: none;
       color: white;
@@ -31,11 +29,9 @@
       border-radius: 8px;
       font-size: 16px;
     }
-
     .top-link a:hover {
       background-color: #155ab6;
     }
-
     form {
       max-width: 500px;
       margin: 20px auto;
@@ -44,13 +40,11 @@
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
-
     label {
       display: block;
       margin-top: 12px;
       font-weight: bold;
     }
-
     input, textarea {
       width: 100%;
       padding: 8px;
@@ -59,7 +53,6 @@
       border: 1px solid #ccc;
       font-size: 16px;
     }
-
     button {
       margin-top: 20px;
       padding: 10px 16px;
@@ -70,34 +63,64 @@
       font-size: 16px;
       cursor: pointer;
     }
-
     button:hover {
       background-color: #e64a19;
+    }
+    .entry-list {
+      max-width: 800px;
+      margin: 40px auto 0;
+    }
+    .entry-item {
+      background: #fff;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .entry-item small {
+      color: #888;
+    }
+    .entry-item button {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      background: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 10px;
+      margin-left: 5px;
+    }
+    .entry-item button.delete {
+      background: #d32f2f;
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
   <h1>CHINACNU 🧡 功勋墙后台录入</h1>
-
   <div class="top-link">
-    <a href="honor-wall.html">🔙 返回功勋墙主页</a>
+    <a href="index.html">🔙 返回功勋墙主页</a>
   </div>
-
   <form id="honorForm">
     <label for="name">员工姓名</label>
     <input type="text" id="name" required>
-
-    <label for="date">日期（如 5月6日）</label>
-    <input type="text" id="date" required>
-
     <label for="story">事迹内容</label>
     <textarea id="story" rows="4" required></textarea>
-
     <label for="reward">奖励内容（如 ￥500元红包 🎉）</label>
     <input type="text" id="reward" required>
-
     <button type="submit">提交记录</button>
   </form>
+
+  <div class="entry-list" id="entryList"></div>
+  <canvas id="canvas"></canvas>
 
   <script>
     const firebaseConfig = {
@@ -108,27 +131,100 @@
       messagingSenderId: "1086345737288",
       appId: "1:1086345737288:web:8dc1e2afc6180b892a947d"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    let editingId = null;
 
     document.getElementById('honorForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('name').value;
-      const date = document.getElementById('date').value;
       const story = document.getElementById('story').value;
       const reward = document.getElementById('reward').value;
-
+      const date = new Date().toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' }) + '日';
       try {
-        await db.collection('honors').add({ name, date, story, reward });
-        alert('提交成功！');
+        if (editingId) {
+          await db.collection('honors').doc(editingId).set({ name, story, reward, date });
+          editingId = null;
+        } else {
+          await db.collection('honors').add({ name, story, reward, date });
+        }
         document.getElementById('honorForm').reset();
       } catch (err) {
         console.error(err);
-        alert('提交失败，请检查控制台。');
+        alert('提交失败');
       }
     });
+
+    function renderEntry(doc) {
+      const data = doc.data();
+      return `<div class="entry-item">
+        <strong>${data.name}</strong> - <small>${data.date}</small>
+        <p>${data.story}</p>
+        <p><strong>${data.reward}</strong></p>
+        <button onclick="editEntry('${doc.id}', '${data.name}', \`${data.story}\`, '${data.reward}')">编辑</button>
+        <button class="delete" onclick="deleteEntry('${doc.id}')">删除</button>
+      </div>`;
+    }
+
+    function loadEntries() {
+      db.collection('honors').orderBy('date', 'desc').onSnapshot(snapshot => {
+        document.getElementById('entryList').innerHTML =
+          snapshot.docs.map(renderEntry).join('');
+      });
+    }
+
+    function editEntry(id, name, story, reward) {
+      document.getElementById('name').value = name;
+      document.getElementById('story').value = story;
+      document.getElementById('reward').value = reward;
+      editingId = id;
+    }
+
+    async function deleteEntry(id) {
+      if (confirm('确定要删除这条记录吗？')) {
+        await db.collection('honors').doc(id).delete();
+      }
+    }
+
+    loadEntries();
+
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    let particles = [];
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+    document.addEventListener("mousemove", function(e) {
+      for (let i = 0; i < 5; i++) {
+        particles.push({
+          x: e.clientX,
+          y: e.clientY,
+          size: Math.random() * 5 + 2,
+          life: 30,
+          dx: (Math.random() - 0.5) * 2,
+          dy: (Math.random() - 0.5) * 2
+        });
+      }
+    });
+    function drawParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < particles.length; i++) {
+        let p = particles[i];
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,112,67,${p.life / 30})`;
+        ctx.fill();
+        p.x += p.dx;
+        p.y += p.dy;
+        p.life--;
+      }
+      particles = particles.filter(p => p.life > 0);
+      requestAnimationFrame(drawParticles);
+    }
+    drawParticles();
   </script>
 </body>
 </html>
-
