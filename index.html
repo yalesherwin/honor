@@ -2,79 +2,64 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>CHINACNU 功勋墙</title>
+  <title>CHINACNU ❤️ 功勋墙</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: "Segoe UI", sans-serif;
       margin: 0;
-      padding: 20px;
-      background: radial-gradient(circle at top left, #ffe6f0, #fff5f8, #fce3ec);
-      position: relative;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(-45deg, #ffd3e0, #ffeacc, #e0f7fa, #f8bbd0);
+      background-size: 400% 400%;
+      animation: gradientMove 15s ease infinite;
+      color: #333;
     }
+
     h1 {
       text-align: center;
-      font-family: 'Pacifico', cursive;
-      font-size: 36px;
-      color: #ff4081;
+      padding: 30px 10px;
+      font-size: 32px;
+      color: #d84315;
     }
-    .top-link {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .top-link a {
-      text-decoration: none;
-      color: white;
-      background-color: #f06292;
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-    .top-link a:hover {
-      background-color: #e91e63;
-    }
-    .clock {
-      text-align: center;
-      font-size: 18px;
-      color: #e91e63;
-      margin-bottom: 10px;
-    }
+
     .timeline {
       max-width: 800px;
       margin: auto;
+      position: relative;
       padding: 20px;
     }
+
     .entry {
       background: #ffffffcc;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       margin: 20px 0;
       padding: 20px;
-      border-left: 6px solid #ff80ab;
+      border-left: 6px solid #ff7043;
       position: relative;
     }
+
     .entry::before {
-      content: '💕';
+      content: '📌';
       position: absolute;
       left: -30px;
       top: 20px;
       font-size: 20px;
     }
+
     .entry h3 {
       margin-top: 0;
       font-size: 20px;
     }
+
     .entry .date {
       color: #888;
       font-size: 14px;
       margin-bottom: 8px;
     }
+
     .entry .reward-btn {
       float: right;
-      background: #ff80ab;
+      background: #ff7043;
       color: white;
       border: none;
       padding: 6px 12px;
@@ -82,10 +67,25 @@
       cursor: pointer;
       font-size: 14px;
     }
+
     .entry .reward-btn:hover {
-      background: #ec407a;
+      background: #e64a19;
     }
-    .reward-popup {
+
+    /* 鼠标粒子动画 */
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      pointer-events: none;
+    }
+  @keyframes gradientMove {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+      .reward-popup {
       position: fixed;
       top: 50%;
       left: 50%;
@@ -95,114 +95,83 @@
       border-radius: 12px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.3);
       display: none;
-      z-index: 10;
+      z-index: 9999;
       text-align: center;
+      animation: popupFadeIn 0.4s ease;
     }
+
     .reward-popup h2 {
-      color: #e91e63;
+      color: #d84315;
       margin-bottom: 10px;
+      font-size: 24px;
     }
+
     .reward-popup p {
-      margin: 0;
       font-size: 18px;
+      color: #444;
+      margin: 0;
     }
-    .reward-popup img {
-      width: 100px;
-      margin: 10px 0;
-    }
+
     .reward-popup .close-btn {
       margin-top: 15px;
-      background: #ff80ab;
+      background: #ff7043;
       color: white;
       border: none;
-      padding: 6px 12px;
+      padding: 6px 14px;
       border-radius: 6px;
       cursor: pointer;
     }
-    canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: -1;
-      pointer-events: none;
+
+    .reward-popup .icon {
+      font-size: 48px;
+      animation: bounce 1s infinite;
+      margin-bottom: 10px;
+    }
+
+    @keyframes popupFadeIn {
+      from {opacity: 0; transform: scale(0.8) translate(-50%, -50%);}
+      to {opacity: 1; transform: scale(1) translate(-50%, -50%);}
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
     }
   </style>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
-  <h1>CHINACNU 💖 功勋墙</h1>
-  <div class="clock" id="clock"></div>
-  <div class="top-link">
-    <a href="admin.html">➕ 进入后台添加记录</a>
+  <h1>CHINACNU ❤️ 功勋墙</h1>
+  <div class="timeline" id="timeline">
+    <!-- 实时数据加载中 -->
   </div>
-  <div class="timeline" id="timeline"></div>
 
-  <div id="rewardPopup" class="reward-popup">
+  <div class="reward-popup" id="rewardPopup">
+    <div class="icon">🧧</div>
     <h2 id="popupTitle"></h2>
-    <img src="https://media.giphy.com/media/Y3yJ3lCdXh2n7YzSFF/giphy.gif" alt="红包">
     <p id="popupContent"></p>
     <button class="close-btn" onclick="hideReward()">关闭</button>
   </div>
+
+    
+  </div>
+
+  <!-- 粒子动效 -->
   <canvas id="canvas"></canvas>
-
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCZNKMCdghr3pG7oaf5KBFR_2p_aBIuv6k",
-      authDomain: "honor-94300.firebaseapp.com",
-      projectId: "honor-94300",
-      storageBucket: "honor-94300.firebasestorage.app",
-      messagingSenderId: "1086345737288",
-      appId: "1:1086345737288:web:8dc1e2afc6180b892a947d"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    const timeline = document.getElementById('timeline');
-    const clock = document.getElementById("clock");
-
-    function updateClock() {
-      const now = new Date();
-      const timeString = now.toLocaleTimeString('zh-CN');
-      clock.textContent = `当前时间：${timeString}`;
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
-
-    function renderEntry(data) {
-      const div = document.createElement('div');
-      div.className = 'entry';
-      div.innerHTML = `
-        <h3>${data.name}</h3>
-        <div class="date">${data.date}</div>
-        <p>${data.story}</p>
-        <button class="reward-btn" onclick="showReward('${data.name}', '${data.reward}')">查看奖励</button>
-      `;
-      timeline.prepend(div);
-    }
-
-    db.collection("honors").orderBy("date", "desc").onSnapshot(snapshot => {
-      timeline.innerHTML = '';
-      snapshot.forEach(doc => renderEntry(doc.data()));
-    });
-
-    function showReward(name, reward) {
-      document.getElementById("popupTitle").innerText = `${name} 的奖励`;
-      document.getElementById("popupContent").innerText = reward;
-      document.getElementById("rewardPopup").style.display = 'block';
-    }
-
-    function hideReward() {
-      document.getElementById("rewardPopup").style.display = 'none';
-    }
-
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
     let particles = [];
+
     function resizeCanvas() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     }
+
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
+
     document.addEventListener("mousemove", function(e) {
       for (let i = 0; i < 5; i++) {
         particles.push({
@@ -215,13 +184,14 @@
         });
       }
     });
+
     function drawParticles() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (let i = 0; i < particles.length; i++) {
         let p = particles[i];
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255,64,129,${p.life / 30})`;
+        ctx.fillStyle = `rgba(255,112,67,${p.life / 30})`;
         ctx.fill();
         p.x += p.dx;
         p.y += p.dy;
@@ -230,7 +200,49 @@
       particles = particles.filter(p => p.life > 0);
       requestAnimationFrame(drawParticles);
     }
+
     drawParticles();
+
+    function showReward(name, reward) {
+      document.getElementById("popupTitle").innerText = `${name} 的奖励`;
+      document.getElementById("popupContent").innerText = reward;
+      document.getElementById("rewardPopup").style.display = 'block';
+    }
+
+    function hideReward() {
+      document.getElementById("rewardPopup").style.display = 'none';
+    }
+
+    // Firebase 初始化
+    const firebaseConfig = {
+      apiKey: "AIzaSyCZNKMCdghr3pG7oaf5KBFR_2p_aBIuv6k",
+      authDomain: "honor-94300.firebaseapp.com",
+      projectId: "honor-94300",
+      storageBucket: "honor-94300.firebasestorage.app",
+      messagingSenderId: "1086345737288",
+      appId: "1:1086345737288:web:8dc1e2afc6180b892a947d"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const timeline = document.getElementById("timeline");
+
+    function renderEntry(data) {
+      const div = document.createElement("div");
+      div.className = "entry";
+      div.innerHTML = `
+        <h3>${data.name}</h3>
+        <div class="date">${data.date}</div>
+        <p>${data.story}</p>
+        <button class="reward-btn" onclick="showReward('${data.name}', '${data.reward}')">查看奖励</button>
+      `;
+      timeline.appendChild(div);
+    }
+
+    db.collection("honors").orderBy("date", "desc").onSnapshot(snapshot => {
+      timeline.innerHTML = "";
+      snapshot.forEach(doc => renderEntry(doc.data()));
+    });
   </script>
 </body>
 </html>
